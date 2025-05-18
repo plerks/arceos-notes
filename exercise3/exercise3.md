@@ -212,15 +212,33 @@ arceos_api 依赖了 alt_axalloc。 (arceos/api/arceos_api/Cargo.toml中，alt_a
 alt_axalloc 依赖 bump_allocator，这样才走到要修改`arceos/modules/bump_allocator/src/lib.rs`这个文件的。
 
 ### "alt_alloc" feature起了什么用？
-先来思考这个问题，arceos_api同时依赖了axalloc和alt_axalloc，对应modules/axalloc和modules/alt_axalloc，这二者都有定义GLOBAL_ALLCATOR:
+先来思考这个问题，arceos_api的[dependencies]里其实同时写了axalloc和alt_axalloc，对应modules/axalloc和modules/alt_axalloc，这二者都有定义GLOBAL_ALLCATOR:
 ```Rust
 #[cfg_attr(all(target_os = "none", not(test)), global_allocator)]
 static GLOBAL_ALLOCATOR: GlobalAllocator = GlobalAllocator::new();
 ```
 为什么没报重定义？
 
-我猜是这样：
+因为axalloc和alt_axalloc都是[Optional dependencies](https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies)
 
-GLOBAL_ALLOCATOR其实是被axruntime的init_allocator()调用的，arceos/modules/axruntime/src/lib.rs中写了两个init_allocator()，分别由"alloc"和"alt_alloc" feature控制条件编译。
+arceos/api/arceos_api/Cargo.toml是这样的：
 
-arceos_api 是依赖了 axruntime 的，arceos_api的"alt_alloc" feature 会通过 axfeat，最终让 axruntime 也使用 "alt_alloc" feature。这样axalloc和alt_axalloc这两个crate，最终有一个的函数是没有被用到的，于是最终不会被链接器链接进来，最终只有一个GlobalAllocator。
+```toml
+[features]
+alloc = ["dep:axalloc", "axfeat/alloc"]
+alt_alloc = ["dep:alt_axalloc", "axfeat/alt_alloc"]
+
+[dependencies]
+axsync = { workspace = true }
+axalloc = { workspace = true, optional = true }
+alt_axalloc = { workspace = true, optional = true }
+```
+
+参考[Optional dependencies](https://doc.rust-lang.org/cargo/reference/features.html#optional-dependencies)，axalloc和alt_axalloc都是可选的依赖，默认是不会被使用的。
+
+而`alt_alloc = ["dep:alt_axalloc"`代表，启用了"alt_alloc" feature的情况下，alt_axalloc这个依赖才会参与编译。所以这里只有alt_axalloc会被使用，GLOBAL_ALLOCATOR不会报重定义。
+
+`dep:`代表后面这个名字是个依赖，而不是feature的名字，避免混淆。如果是像"axfeat/alloc"这样的两段，cargo一定能确定是指某个依赖的某个feature。但是像"axalloc"这样一段的名字，如果当前crate有个叫axalloc的feature，依赖也有个叫axalloc的crate，就会有歧义，会被优先解释为当前crate的feature，所以要用`dep:`显式指明。
+
+
+题外话：GLOBAL_ALLOCATOR其实是被axruntime的init_allocator()使用的，arceos/modules/axruntime/src/lib.rs中写了两个init_allocator()，分别由"alloc"和"alt_alloc" feature控制条件编译。
