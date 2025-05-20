@@ -43,7 +43,7 @@ EarlyAllocator所掌管的内存区域是init()时注册给它的，不考虑调
 
 arceos的组件化程度很高，很多东西都定义为了crate (所以有很多个Cargo.toml)。这里分析下执行`make run A=exercises/alt_alloc/`时发生了什么，`make run A=exercises/alt_alloc/ -n`可以让make只打印要执行的命令而不实际执行。
 
-（注意`make run A=exercises/alt_alloc/`只是把组件拿出来运行了，不是arceos的启动执行流程）
+`make run A=exercises/alt_alloc/`其实是unikernel的rust_main()在启动初始化好之后，会调用用户app `exercises/alt_alloc`的main()。具体见[unikernel概念](../exercise4/exercise4.md#unikernel概念)。
 
 首先看 arceos/exercises/alt_alloc/Cargo.toml，其引入了 axstd 这个依赖：
 ```toml
