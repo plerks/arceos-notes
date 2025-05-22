@@ -60,3 +60,7 @@ payload 是用`musl-gcc`编译出来的，但是 arceos 也能跑，是因为 ar
 
 `make run A=exercises/sys_map/ BLK=y`，打印出来的日志里有系统调用的记录，例如 "handle_syscall [66] ..."，而在 arceos/exercises/sys_map/src/syscall.rs 中：`const SYS_WRITEV: usize = 66;`。所以说，arceos 配合实现了相关系统调用，这样`musl-gcc`编译出来的程序才能跑在 arceos 上。
 
+# 当前执行流程
+执行`make run A=exercises/sys_map/ BLK=y`，exercises/sys_map/ 的 main() 仍然是被 rust_main() 调用的，其是与os在一起的。只是 exercises/sys_map/ 的 main() 的作用是去加载执行文件系统中的 /sbin/mapfile，mapfile 是个用户程序，这样就实现了支持用户程序的执行。
+
+如果 exercises/sys_map/ 本身是个shell，那样就是启动后 shell 等待用户输入操作。
