@@ -50,7 +50,7 @@ extern "C" {
 
 也就是说，编译链接的时候，用户程序的main和内核代码在一起平级的，只有一个内核态，用户main直接被rust_main调用。
 
-这个unikernel概念应该只是教学前期构建简单操作系统使用，后面会分内核态与用户态。
+这个unikernel概念应该只是教学前期构建简单操作系统使用，后面会分内核态与用户态。（补充：嵌入式的环境里也可以用这种unikernel概念的内核）
 
 # 练习4的文件系统
 练习4用到的文件系统 arceos/axfs_ramfs 是个内存文件系统，其Cargo.toml里有documentation[地址](https://docs.rs/axfs_ramfs/latest/axfs_ramfs/)。文档中说了自己是个"RAM filesystem used by ArceOS"。

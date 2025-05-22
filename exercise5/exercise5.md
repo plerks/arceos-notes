@@ -24,6 +24,8 @@ make run A=exercises/sys_map/ BLK=y
 
 `make payload`应该是把linux应用程序给编译出来。`make payload -n`跟着看一下，能看到是用`riscv64-linux-musl-gcc`把payload编译出来，例如把 arceos/payload/mapfile_c/mapfile.c 编译出来。
 
+musl-gcc的[安装](https://rcore-os.cn/arceos-tutorial-book/ch01-04.html)。
+
 `./update_disk.sh payload/mapfile_c/mapfile`应该是生成 disk_img 文件，会把 payload/mapfile_c/mapfile 写进去，disk_img 是文件系统镜像。这样文件系统里就有了编译好的linux应用。
 
 ## 为什么用`musl-gcc`编译而不用`gcc`？
