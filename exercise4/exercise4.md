@@ -29,7 +29,7 @@ fn rename(&self, _src_path: &str, _dst_path: &str) -> VfsResult {
 ```
 VfsNodeOps属于crate.io上的依赖[axfs_vfs](https://docs.rs/axfs_vfs/latest/axfs_vfs/)，这是个定义接口的，里面定义的全是trait。这和第二阶段rcore-camp-guide的`pub static ref BLOCK_DEVICE: Arc<dyn BlockDevice> = Arc::new(BlockDeviceImpl::new());`很像，用接口作为了声明类型，然后运行时调用函数发生动态绑定。
 
-由于VfsNodeOps trait中提供了rename的默认实现(报err)，所以如果
+由于VfsNodeOps trait中提供了rename的默认实现(报err)，所以如果实际类型没有实现rename的话会调到这个默认实现，于是会报err。
 
 于是找实现了VfsNodeOps的类型，arceos/axfs_ramfs/src/dir.rs中: `impl VfsNodeOps for DirNode`，但是impl中没有写rename函数，而由于VfsNodeOps trait中提供了rename的默认实现(报err)，所以会调到这个报err的rename默认实现。
 
